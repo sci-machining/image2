@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - React &amp; CSS Grid Image Gallery</title>
+
+  <style>
+    @charset "UTF-8";
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: helvetica;
+      position: relative;
+      font-size: 100%;
+      background: linear-gradient(to bottom, #ffffff, #66b3ff) ;
+
+    }
+
+    .gallery-container {
+      padding: 0.9375rem 0;
+    }
+
+    .gallery-container h1 {
+      margin: 2rem 0;
+      padding: 0;
+      text-align: center;
+      color: #ff ;
+      text-transform: uppercase;
+      font-size: 6.5vw;
+      font-weight: lighter;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 8px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 20em) {
+      .gallery-grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+
+    @media (min-width: 34em) {
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 60em) {
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .gallery-grid img {
+      width: 100% ;
+      border: 5px solid #fff;
+    }
+
+    .gallery-grid div {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .gallery-grid div:before,
+    .gallery-grid div:after {
+      transition: 0.3s opacity ease;
+      opacity: 0;
+    }
+
+    .gallery-grid div:after {
+      content: "↔";
+      font-size: 80px;
+      position: absolute;
+      transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+      color: #00 ;
+      left: 50%;
+      top: 50%;
+      display: block;
+    }
+
+    .gallery-grid div:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      background: rgba(34, 34, 34, 0.5);
+      display: block;
+    }
+
+    .gallery-grid div:hover:before,
+    .gallery-grid div:hover:after {
+      opacity: 1;
+      transition: 0.3s opacity ease;
+    }
+
+    .modal {
+      position: fixed;
+      z-index: 999;
+      width: 50%;
+      max-width: 800px;
+      top: 50%;
+      left: 50%;
+      transform: translate3d(-50%, -50%, 0);
+    }
+
+    @media (min-width: 20em) {
+      .modal {
+        width: 95%;
+      }
+    }
+
+    @media (min-width: 34em) {
+      .modal {
+        width: 80%;
+      }
+    }
+
+    @media (min-width: 60em) {
+      .modal {
+        width: 60%;
+      }
+    }
+
+    .modal img {
+      width: 100%;
+      border: 5px solid #fff;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      z-index: 1;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      top: 0;
+      left: 0;
+    }
+
+    .modal-body a {
+      position: absolute;
+      display: inline;
+      color: #222;
+      text-decoration: none;
+      line-height: 36px;
+      font-size: 30px;
+      font-weight: lighter;
+      background: #00 ;
+      border-radius: 5px;
+      height: 40px;
+      width: 40px;
+      text-align: center;
+    }
+
+    .modal-body .modal-close {
+      right: 0;
+      top: 0;
+      border-radius: 0 0 0 5px;
+    }
+
+    .modal-body .modal-next,
+    .modal-body .modal-prev {
+      right: 0;
+      top: calc(50% - 25px);
+      border-radius: 5px 0 0 5px;
+      height: 50px;
+      line-height: 40px;
+      font-size: 60px;
+    }
+
+    .modal-body .modal-prev {
+      left: 0;
+      right: auto;
+      border-radius: 0 5px 5px 0;
+    }
+
+    .modal-body {
+      position: relative;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- partial:index.partial.html -->
+  <section class="gallery-container"></section>
+  <!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js'></script>
+
+  <script>
+     const imgUrls = ['https://db3pap007files.storage.live.com/y4m3G8bwaCVKQjnJjYIClk6NZv3e9zgC0eF8f2tor1i_xu5cnAhpvxrjScxLS-rRzxFQSVi_aVNaUAd16N_s_FCY19nCE8s77KDf2eQjTHxJ0Ai_wFEpykl_YwxzUgXPEuI5Xn3Ud77wudIOJl_bsnWn9HJfUfAs5nRK-UmjmYPRe5Rgcy6_gOMR_wbvXOXieONM-jGwZK2P8YuGVE6W92sIg?encodeFailures=1&width=327&height=581',
+'https://db3pap007files.storage.live.com/y4mGUdV-NiraC5b9RfSZZ3qYTwKGpp5R7AFxCaEs4PilYS21nm_VMEsMFCWBiv7AcN-YX6KPnDV4o08TmK8GL72ToMmXD44W3-yaAZvPoqz6IWGEmehrp1ezsrmZvcX9WHJqizXV7J1hPNxFMqNCOSOHRZNQiFI2xaGVMJJBhPDC6DPjbU4BYgoZ7GD9t56jULO_uz_dA68CNfHP-8pe7khxw?encodeFailures=1&width=327&height=581',
+'https://db3pap007files.storage.live.com/y4mshQjsZe4ACSgR2ASJZkVqu5aX81qarXsLd6rPlljahfrqI1aquhU5asqhWW5CDsR-f3GDuw7Rmab2H1IfCKQSODpbDb1MxW6gllLAWccgkk-4rQUqVzRkEJlqoU6xNbhxzInZ8tJNHSALP_J7KMeNxr06PxcnGXJHvwJ13dSZeLmc0MRXXdro3GKwbqhn0MdK2BDAuEK0Rb2xITnQNVXpA?encodeFailures=1&width=327&height=581',
+'https://db3pap007files.storage.live.com/y4mWbBVuRBskBpI5-4__c4OsthNn6fnH5kC4nktAx6eSlacXr2ApyNMPs9uUiUMAx3WvW3cBsPhSu9fDdOTQF_O5W7FzseDOLVpH_NifHkBOpsdm-HhVOGIhbjqMRcLvmLhl9fJbS_Q26VEGa1Cj-tkK9NCootwWToRLzOjdZzUu_JKiWpcMxR6pjZWjow_cU2JdmLPMiAy5K58h1v2e4h4gw?encodeFailures=1&width=1033&height=581',
+'https://db3pap007files.storage.live.com/y4m_Lc4TPTjqaxoIx6ZHP5TWEhHShhfyllgzE7mfQwmpFljGU2MBH7AZhkvOM6dQ0gY6h5oftq-1YHAyfrG02JMOwUyuNuLDuv8rw9ljk5EQDJGHJr0uQtTXyC4HMZ73-SQ96ffOe0lKsFOMUrmPLEwalaLh6Yuw2lPBwcQtp2gUdMf-fi2WCy_LOP9d71T8Gr8wiPpE_8txn0cRNwp4GZUHw?encodeFailures=1&width=1033&height=581',
+];
+
+
+    class Gallery extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { currentIndex: null };
+        this.closeModal = this.closeModal.bind(this);
+        this.findNext = this.findNext.bind(this);
+        this.findPrev = this.findPrev.bind(this);
+        this.renderImageContent = this.renderImageContent.bind(this);
+      }
+      renderImageContent(src, index) {
+        return /*#__PURE__*/(
+          React.createElement("div", { onClick: e => this.openModal(e, index) }, /*#__PURE__*/
+            React.createElement("img", { src: src, key: src })));
+
+
+      }
+      openModal(e, index) {
+        this.setState({ currentIndex: index });
+      }
+      closeModal(e) {
+        if (e != undefined) {
+          e.preventDefault();
+        }
+        this.setState({ currentIndex: null });
+      }
+      findPrev(e) {
+        if (e != undefined) {
+          e.preventDefault();
+        }
+        this.setState(prevState => ({
+          currentIndex: prevState.currentIndex - 1
+        }));
+
+      }
+      findNext(e) {
+        if (e != undefined) {
+          e.preventDefault();
+        }
+        this.setState(prevState => ({
+          currentIndex: prevState.currentIndex + 1
+        }));
+
+      }
+      render() {
+        return /*#__PURE__*/(
+          React.createElement("div", { className: "gallery-container" }, /*#__PURE__*/
+            React.createElement("h1", null, "تصاویر"), /*#__PURE__*/
+            React.createElement("div", { className: "gallery-grid" },
+              imgUrls.map(this.renderImageContent)), /*#__PURE__*/
+
+            React.createElement(GalleryModal, {
+              closeModal: this.closeModal,
+              findPrev: this.findPrev,
+              findNext: this.findNext,
+              hasPrev: this.state.currentIndex > 0,
+              hasNext: this.state.currentIndex + 1 < imgUrls.length,
+              src: imgUrls[this.state.currentIndex]
+            })));
+
+
+
+      }
+    }
+
+
+    class GalleryModal extends React.Component {
+      constructor() {
+        super();
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+      }
+      componentDidMount() {
+        document.body.addEventListener('keydown', this.handleKeyDown);
+      }
+      componentWillUnMount() {
+        document.body.removeEventListener('keydown', this.handleKeyDown);
+      }
+      handleKeyDown(e) {
+        if (e.keyCode === 27)
+          this.props.closeModal();
+        if (e.keyCode === 37 && this.props.hasPrev)
+          this.props.findPrev();
+        if (e.keyCode === 39 && this.props.hasNext)
+          this.props.findNext();
+      }
+      render() {
+        const { closeModal, hasNext, hasPrev, findNext, findPrev, src } = this.props;
+        if (!src) {
+          console.log('whut');
+          return null;
+        }
+        return /*#__PURE__*/(
+          React.createElement("div", null, /*#__PURE__*/
+            React.createElement("div", { className: "modal-overlay", onClick: closeModal }), /*#__PURE__*/
+            React.createElement("div", { isOpen: !!src, className: "modal" }, /*#__PURE__*/
+              React.createElement("div", { className: "modal-body" }, /*#__PURE__*/
+                React.createElement("a", { href: "#", className: "modal-close", onClick: closeModal, onKeyDown: this.handleKeyDown }, "\xD7"),
+                hasPrev && /*#__PURE__*/React.createElement("a", { href: "#", className: "modal-prev", onClick: findPrev, onKeyDown: this.handleKeyDown }, "\u2039"),
+                hasNext && /*#__PURE__*/React.createElement("a", { href: "#", className: "modal-next", onClick: findNext, onKeyDown: this.handleKeyDown }, "\u203A"), /*#__PURE__*/
+                React.createElement("img", { src: src })))));
+
+
+
+
+      }
+    }
+
+
+    ReactDOM.render( /*#__PURE__*/React.createElement(Gallery, null), document.querySelector('.gallery-container'));
+  </script>
+
+</body>
+
+</html>
